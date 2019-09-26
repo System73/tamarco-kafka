@@ -1,0 +1,43 @@
+language: python
+env:
+  global:
+    - LIBRDKAFKA_VERSION=v0.11.0
+services:
+  - docker
+matrix:
+  include:
+    - dist: trusty
+      python: "3.6"
+      script:
+        - make test-coverage
+        - make linters
+        - sonar-scanner
+    - dist: xenial
+      python: "3.7"
+      script: make test
+before_install:
+  - rm -rf tmp-build
+  - tests/bootstrap-librdkafka.sh ${LIBRDKAFKA_VERSION} tmp-build
+install:
+  - pip install -r requirements_dev.txt
+notifications:
+  email:
+    - opensource@system73.com
+deploy:
+  provider: pypi
+  user:
+    secure: "U5/y5d8OFO7FmKSDuR6jdXa5VrEaquOJqXdDvgTcCww98j5iHWskJUlcR8e77gYeaL99n1Lw9VobX44V1v8S+/u13ieV8yRCAh31dr2jltK3i7oENHyUIQb04l3H2OcQFnUD8FZ5/KL0trQHNJH48jZHw10xdqGE9XZtc66FG3/cNnCj29C4P2v2VgFAVF/D3FFX807jmqGmaPmvuMHFvNTBTVyeEK3Ku/K8VSbMEU7qKPd2XYiweUqj5VE8Ya/dE28k884G2C7wYq+4N1Aci45ENhTBKH5/7vrPb+RHxb1+tYGlXlZsJ2+1HrMujLcEGc0M9E0RxzKasolvxW4KhymgZyZNk6SrauYVSoF6fWnYxZyFukJOrwIh6QOumOsDAw4p89sDC9IsKRXFSHsFt5wU9dQaJJkpn/yij164nSUY/Uu8Sh0b92cVHcBjBK7fEAe8JbFbxpemkJBdRAWUv1BIb866R9l060zmaFTh4oF8LNU11+aDOWosSmuffbS8oLJs8kKmrHdrSQzg0Jj70nPKgxvbW2Vs7JzETfRrgn46uIhHjEp7fM4tB1OqBbtkgVmijsBlQ+88ni/OG548LxUk+Q82uuue1WIY0aX9TeFm1hLNLennJgHxyeRAGeeghKsUXQMvTKy8M8VcMq2MwmSn7uiZxZNDpBb/pBlGLv4="
+  password:
+    secure: "s/EwFx+rNxw5GnAOgcmYHJBqkUEVCrM2HGJVzXcp76VXPo2/IpRaZ4bMFYZTs2Os9lqf2zNMTUxs5ERxUEQCjV+aMDBJqDpF/lVeuv/CPtDoaAUI+IwA0zW/fCsQspIGgfnvDSooeUTd7WtjDwbOkiXife160aOXsMsfrq1GcCfQhVT/ySqiBYOrd9jm89EANJOtiBUwaJzcyve/QrPwIjYaFjIduuFCgH/r+M6IwRsiSJ2VQiDAwYWV+2Inp3l8OlF9tgQI6A52cPAQNvLo6wwUXyEg9qQozETP9lC24SS5X134JB7e6s41TR18d6ov7N5FjKgyWUIOZjatmqvVnJ32TRVo3D+xYghplNarWX/vciKCF1mHrhEQ4peyu9+HxgP6WBD4P0zJiXjDTRrvo2exgkUfDE0LQOiiQ5MR7yQTp1iSy+AvxjiF7W60upu59jKNpPqG4SDILgopF4pxs6bx0GTVSl6plxBhIRTc8PKD4eHbejKStoNXQ7fvg+abBywjMUd+xENLBBsBr/wcre5/ThnTlxlHqtgtrEOxjgFbyL6CZIUeuBLwsBjm5D3dGU8pHtV3lokpJ5o8Cy7cYm8Qpssn6Nr021TCuQFmFvN3ESRmF9R1MfPJ7ww50RqtE1q0Y5h6Dq3w3am0sC5cGkPUks7uvTCoMuoFoc7G2XI="
+  skip_existing: true
+  on:
+    tags: true
+    branch: master
+# Allow SonarCloud to access the full SCM history.
+git:
+  depth: false
+addons:
+  sonarcloud:
+    organization: "system73"
+    token:
+      secure: "b5D+SKchPUcnK7F0SkOOPQ5oe57ch/RZfF8rBFDLFEuMKPhIvQXZWrpc5W1G5d5xZa2TlVfDCzts6BXOWxqFBIUVx+UTenE+u3DXJnuZZwWNbSUjG10+KbgugllYjeTEnVHC+kcdZo86KI8u2s/+N1WFhgF0gmf7flc5wEH0hYY/kPSfJng45em1cxka0EXwJnFFTPJcDAbZMOdJ8Sufe6D6yAtOxv8NdwZf23m6dp9071JnNI9DO0+xV29cuOtURwr1R0UM1x+MSspGn03TdHXjrqDRipp7RvuDIfU/NnYm9J0WTFIPh+zN5gsSAcvNJSqtAkq8r+iFtzTL3YmrmbBxxRDUtxGGUUeKYgXQ5hfDNZftIMX5TWYZWYMHPOjVBB7J0jxICqgF4k0dGJqB/nn5eBTnn0n+W0BK8QqrWzvnB1A4tWtcvl1j73bFmch4NSBvwUhTp2ruJmTmJjJr5g+B2DekziAAy5kesH/7qMIXuBsQNIDgzopCXAbdBYrya0kwEIyIdwUbYVFAKm2j0fMEMUvUltLYhLSFbIotHji+sLgN9R21BGgBYp73v2XJiXAb+UUiU5lsigWW4FFG4tLpxY6vjAxTyAIKRqC3NpKWKuxISf46XV4UmCM3jmOuEc74p3CHtwcZZavKVZlepDTzUQpeVlz+S5hONScAvJQ="

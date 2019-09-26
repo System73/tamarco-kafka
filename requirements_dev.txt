@@ -1,0 +1,3 @@
+attrs>=17.4
+tamarco[ci]==0.*
+confluent-kafka==1.0.0
